@@ -2044,27 +2044,133 @@ hive-query-plan-viz
 
 使用之前要加上formatted
 
+### 分组聚合的优化
+
+**map-side**
+
+通过对map端的聚合，能够有效减少shuffle的数据量，提高分组聚合运算的效率。
+
+map-side 聚合相关的参数如下：
+
+```hive
+--启用map-side聚合
+
+set hive.map.aggr=true;
+
+--用于检测源表数据是否适合进行map-side聚合。检测的方法是：先对若干条数据进行map-side聚合，若聚合后的条数和聚合前的条数比值小于该值，则认为该表适合进行map-side聚合；否则，认为该表数据不适合进行map-side聚合，后续数据便不再进行map-side聚合。
+
+set hive.map.aggr.hash.min.reduction=0.5;
+
+--用于检测源表是否适合map-side聚合的条数。
+
+set hive.groupby.mapaggr.checkinterval=100000;
+
+--map-side聚合所用的hash table，占用map task堆内存的最大比例，若超出该值，则会对hash table进行一次flush。
+
+set hive.map.aggr.hash.force.flush.memory.threshold=0.9;
+```
+
+
+
+### JOIN优化
+
+#### JOIN算法概述
+
+Hive拥有多种join算法，包括Common Join，Map Join，Bucket Map Join，Sort Merge Buckt Map Join等，下面对每种join算法做简要说明：
+
+##### Common Join
+
+Common Join是Hive中最稳定的join算法，其通过一个MapReduce Job完成一个join操作。Map端负责读取join操作所需表的数据，并按照**关联字段**进行分区，通过Shuffle，将其发送到Reduce端，相同key的数据在Reduce端完成最终的Join操作。如下图所示：
+
+![image-20240721130649279](./../pictures/image-20240721130649279.png)
+
+**注意：**sql语句中的join操作和执行计划中的Common Join任务并非一对一的关系，一个sql语句中的**相邻**的且**关联字段相同**的多个join操作可以合并为一个Common Join任务。
+
+##### Map Join
+
+Map Join算法可以通过两个只有map阶段的Job完成一个join操作。其适用场景为**大表join小表**。若某join操作满足要求，则第一个Job会读取小表数据，将其制作为hash table，并上传至Hadoop分布式缓存（本质上是上传至HDFS）。第二个Job会先从分布式缓存中读取小表数据，并缓存在Map Task的内存中，然后扫描大表数据，这样在map端即可完成关联操作。
+
+Map Join工作流程：
+
+![image-20240721132359042](./../pictures/image-20240721132359042.png)
+
+Hint 提示，参数同Bucket Map Join。
+
+自动触发逻辑：(列出所有可能方案MapJoinLocalTask，如果都不行，则执行备用方案CommonJoinTask)
+
+![image-20240721145038872](./../pictures/image-20240721145038872.png)
+
+Map join自动转换的具体判断逻辑如下图所示：
+
+![image-20240721145101660](./../pictures/image-20240721145101660.png)
+
+注：full join不能用Map Join，因为找不到大表候选人。
+
+图中涉及到的参数如下：
+
+```hive
+--启动Map Join自动转换
+set hive.auto.convert.join=true; 
+
+--开启无条件转Map Join
+set hive.auto.convert.join.noconditionaltask=true;
+
+--一个Common Join operator转为Map Join operator的判断条件,若该Common Join相关的表中,存在n-1张表(除去的那张表是大表)的已知大小总和<=该值,则生成一个Map Join计划,此时可能存在多种n-1张表的组合均满足该条件,则hive会为每种满足条件的组合均生成一个Map Join计划,同时还会保留原有的Common Join计划作为后备(back up)计划,实际运行时,优先执行Map Join计划，若不能执行成功，则启动Common Join后备计划。
+set hive.mapjoin.smalltable.filesize=250000;
+								--（指的是文件的大小，实际消耗内存为文件大小*10）
+
+--无条件转Map Join时的小表之和阈值,若一个Common Join operator相关的表中，存在n-1张表的大小总和<=该值,此时hive便不会再为每种n-1张表的组合均生成Map Join计划,同时也不会保留Common Join作为后备计划。而是只生成一个最优的Map Join计划。
+set hive.auto.convert.join.noconditionaltask.size=10000000;
+```
+
+具体优化案例： [138-Hive-Join优化-案例-Map-Join-优化-上_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1g84y147sX?p=138&vd_source=af897e0e9d744e904b2642117e4a5ed1)
+
+##### Bucket Map Join
+
+Bucket Map Join是对Map Join算法的改进，其打破了Map Join只适用于大表join小表的限制，可用于大表join大表的场景。
+
+Bucket Map Join的**核心思想**是：若能保证参与join的表均为分桶表，且关联字段为分桶字段，且其中一张表的分桶数量是另外一张表分桶数量的整数倍，就能保证参与join的两张表的分桶之间具有**明确的关联关系**，所以就可以在两表的分桶间进行Map Join操作了。这样一来，第二个Job的Map端就无需再缓存小表的全表数据了，而只需缓存其所需的分桶即可。其原理如图所示：
+
+![image-20240721132519675](./../pictures/image-20240721132519675.png)
+
+1）Hint提示
+
+```hive
+select /*+ mapjoin(ta) */
+  ta.id,
+  tb.id
+from table_a ta
+join table_b tb on ta.id=tb.id;
+```
+
+2）相关参数
+
+```hive
+--关闭cbo优化，cbo会导致hint信息被忽略
+set hive.cbo.enable=false;
+--map join hint默认会被忽略(因为已经过时)，需将如下参数设置为false
+set hive.ignore.mapjoin.hint=false;
+--启用bucket map join优化功能
+set hive.optimize.bucketmapjoin = true;
+```
 
 
 
 
 
+##### Sort Merge Bucket Map Join
 
+Sort Merge Bucket Map Join（简称SMB Map Join）基于Bucket Map Join。SMB Map Join要求，参与join的表均为分桶表，且需保证分桶内的数据是**有序的**，且分桶字段、排序字段和关联字段为相同字段，且其中一张表的分桶数量是另外一张表分桶数量的整数倍。
 
+SMB Map Join同Bucket Join一样，同样是利用两表各分桶之间的关联关系，在分桶之间进行join操作，不同的是，分桶之间的join操作的实现原理。<u>Bucket Map Join</u>，两个分桶之间的join实现原理为<u>Hash Join算法</u>；而**SMB Map Join**，两个分桶之间的join实现原理为**Sort Merge Join算法**。
 
+Hash Join和Sort Merge Join均为关系型数据库中常见的Join实现算法。Hash Join的原理相对简单，就是对参与join的一张表构建hash table，然后扫描另外一张表，然后进行逐行匹配。Sort Merge Join需要在两张按照关联字段排好序的表中进行，其原理如图所示：
 
+![image-20240721134147727](./../pictures/image-20240721134147727.png)
 
+**SMB Map Join与Bucket Map Join比较**
 
-
-
-
-
-
-
-
-
-
-
+SMB Map Join几乎对内存没有要求，可以实现超大表的Join。（在进行Join操作时，Map端是无需对整个Bucket构建hash table，也无需在Map端缓存整个Bucket数据的，每个Mapper只需按顺序逐个key读取两个分桶的数据进行join即可。）
 
 
 

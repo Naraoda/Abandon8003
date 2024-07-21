@@ -409,21 +409,27 @@ MapReduce 是一个**分布式运算程序**的编程框架，是用户开发“
 
 ![image-20240618162547068](./../pictures/image-20240618162547068.png)
 
-​		：Map Reduce
+​	**分散—>汇总**模式	：Map Reduce
 
 ![image-20240618162702171](./../pictures/image-20240618162702171.png)
 
 ​		**中心调度—>步骤执行** 模式：Spark、Flink
 
-2. Map Reduce
+### 3.2Map Reduce
 
-   ​	Hadoop的分布式计算组件，是**分散—>汇总** 模式，供开发人员开发相关程序进行分布式数据计算。
+​	Hadoop的分布式计算组件，是**分散—>汇总** 模式，供开发人员开发相关程序进行分布式数据计算。
 
-   ![image-20240618163302871](C:\Users\WorkDevice\AppData\Roaming\Typora\typora-user-images\image-20240618163302871.png)
+![image-20240618163302871](C:\Users\WorkDevice\AppData\Roaming\Typora\typora-user-images\image-20240618163302871.png)
 
-3. HDFS & MapReduce作业提交过程
+### 3.3HDFS & MapReduce作业提交过程
 
 ![image-20240704153317929](./../pictures/image-20240704153317929.png)
+
+### 3.4shuffle
+
+![img](https://i-blog.csdnimg.cn/blog_migrate/ead6597689ad45c11af740800221699c.png)
+
+
 
 ## **4.YARN**
 

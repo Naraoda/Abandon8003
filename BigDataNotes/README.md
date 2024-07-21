@@ -13,13 +13,14 @@
 
 （注：有基础的话可以不看，或者选看）
 
-0. 深度学习（和大数据没关系，对做研究有帮助，我在研一上学期简单学了一下）：https://space.bilibili.com/1567748478/channel/seriesdetail?sid=358497，感觉看不懂也没关系，尽力去理解就行，这个up的视 频对理解有帮助：https://space.bilibili.com/1921388479/channel/collectiondetail?sid=85730 
-1. java（只看了上部）：https://www.bilibili.com/video/BV17F411T7Ao/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
-2. python：https://www.bilibili.com/video/BV1qW4y1a7fU/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
-3. Git：https://www.bilibili.com/video/BV1sJ411D7xN/?spm_id_from=333.999.0.0
-4. linux和shell：https://www.bilibili.com/video/BV1n84y1i7td/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
-5. MySQL：笔记：[MySQL Notes基础篇](..\MySQL\基础篇\课件pdf版) ，[MySQL Notes提高篇](..\MySQL\提高篇\pdf课件)；视频：[MySQL数据库](https://www.bilibili.com/video/BV1iq4y1u7vj/?spm_id_from=333.999.0.0)
-6. MongoDB：笔记：[MongoDB Notes](./Notes/MongoDB.md) 视频：[黑马程序员MongoDB](https://www.bilibili.com/video/BV1bJ411x7mq/?spm_id_from=333.999.0.0)
+0. 深度学习（和大数据没关系，对做研究有帮助，我在研一上学期简单学了一下）：[跟李沐学AI-哔哩哔哩视频](https://space.bilibili.com/1567748478/channel/seriesdetail?sid=358497)，感觉看不懂也没关系，尽力去理解就行，这个up的视频对理解有帮助：[梗直哥丶-哔哩哔哩视频 ](https://space.bilibili.com/1921388479/channel/collectiondetail?sid=85730)
+1. Java（只看了上部）： [Java零基础视频教程上部-哔哩哔哩](https://www.bilibili.com/video/BV17F411T7Ao/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc)
+2. Python： [Python视频教程-哔哩哔哩](https://www.bilibili.com/video/BV1qW4y1a7fU/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc)
+3. Git： [Git笔记](.\Notes\GitNotes.md) + [Git视频](https://www.bilibili.com/video/BV1sJ411D7xN/?spm_id_from=333.999.0.0)
+
+4. Linux和Shell：视频： [Linux零基础快速入门到精通-哔哩哔哩](https://www.bilibili.com/video/BV1n84y1i7td/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc)
+5. MySQL：笔记： [MySQL Notes基础篇](..\MySQL\基础篇\课件pdf版) ，[MySQL Notes提高篇](..\MySQL\提高篇\pdf课件)；视频：[MySQL数据库](https://www.bilibili.com/video/BV1iq4y1u7vj/?spm_id_from=333.999.0.0)
+6. MongoDB：笔记： [MongoDB Notes](./Notes/MongoDB.md) 视频：[黑马程序员MongoDB](https://www.bilibili.com/video/BV1bJ411x7mq/?spm_id_from=333.999.0.0)
 7. 数据库介绍：[Database笔记](.\Notes\Database.md)
 
 ### 阶段二：离线数仓部分
@@ -70,10 +71,10 @@
 
 ### 阶段三：spark部分
 
-（注：有时间可以学一下spark和 scala语言，并做一个spark的离线数仓项目，我准备不学spark，直接学flink的内容）
+（注：有时间可以学一下spark和 Scala语言，并做一个spark的离线数仓项目，我准备不学spark，直接学flink的内容）
 
 ###  阶段四：实时数仓部分 
 
-1. flink教程：https://www.bilibili.com/video/BV1eg4y1V7AN/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
-2. redis教程：https://www.bilibili.com/video/BV13R4y1v7sP/?spm_id_from=333.337.search-card.all.click&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
+1. Flink教程：https://www.bilibili.com/video/BV1eg4y1V7AN/?spm_id_from=333.999.0.0&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
+2. Redis教程：https://www.bilibili.com/video/BV13R4y1v7sP/?spm_id_from=333.337.search-card.all.click&vd_source=4c1702a0e944e2290a9681d1aeb164cc 
 3. 实时数仓项目：选择跟离线数仓项目配套的实时数仓项目就可以了
